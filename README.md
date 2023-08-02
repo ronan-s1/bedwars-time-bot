@@ -1,0 +1,2 @@
+# bedwars-time-bot
+TIME!
