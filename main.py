@@ -1,25 +1,48 @@
 import asyncio
+import io
 import os
 import discord
 import csv
+import random
 import pandas as pd
 from datetime import datetime, timedelta
 from discord.ext import commands
-from tabulate import tabulate
 from dotenv import find_dotenv, load_dotenv
+import plotly.graph_objects as go
 
-DOT_ENV_PATH = find_dotenv()
-load_dotenv(DOT_ENV_PATH)
-
-WINS_CSV = "wins.csv"
+# Getting details for running bot
+load_dotenv(find_dotenv())
 TOKEN = str(os.getenv("TOKEN"))
 CHANNEL_ID = 829470513734484031
 ROLE_NAME = "Bed Bugs"
 
+# Other globals
+WINS_CSV = "wins.csv"
+BW_TIME_STRINGS = ["BEDS 🛏️ ROCKING 🪨 TIME ⏰", "GET ON BEDWARS NOW ❗", "BED 🛏️ BUGS 🐛 ASSEMBLE ❗", "TIME FOR BEDWARS ⏰"]
+BEDWARS_TIME = "21:15"
+HOURS, MINUTES = map(int, BEDWARS_TIME.split(":"))
+
+# intents to get messages
 intents = discord.Intents.all()
 intents.messages = True
 
 bot = commands.Bot(command_prefix="$", intents=intents)
+bot.remove_command("help")
+
+
+help_message = """
+- `$add <wins>`: Record the number of bedwars wins for today.
+- `$wins`: Show the wins history.
+- `$chart`: Show a chart of the wins history.
+- `$help`: Show this help message.
+
+souce: https://github.com/ronan-s1/bedwars-time-bot/tree/main
+"""
+
+@bot.command(name="help")
+async def help_command(ctx):
+    await ctx.send(help_message)
+
 
 @bot.command(name="add")
 async def add(ctx, wins):
@@ -27,12 +50,14 @@ async def add(ctx, wins):
     df = pd.read_csv(WINS_CSV)
     max_wins = df["wins"].max()
 
+    # check if valid number
     try:
         wins = int(wins)
         if wins < 0:
             raise ValueError
         elif wins > max_wins:
             win_string = "NEW RECORD BABY OHH YEAHHH"
+            max_wins = wins
         elif wins >= 3:
             win_string = "YOOOOOOOO"
         elif wins > 1:
@@ -41,24 +66,25 @@ async def add(ctx, wins):
             win_string = "mid"
         elif wins == 0:
             win_string = "bruh"
-        
+
     except ValueError:
         await ctx.send("must enter a positive whole number.")
         return
 
     current_date = datetime.now().strftime("%d %b %Y")
-    df = pd.read_csv(WINS_CSV)
 
+    # if same adding multiple wins on same date just override
     if current_date in df["date"].values:
-        await ctx.send(f"{current_date} already exists in the records. Can't add again.")
+        df.loc[df["date"] == current_date, "wins"] = wins
+        df.to_csv(WINS_CSV, index=False)
+        await ctx.send(f"**{win_string}**\n\n**Today's wins (updated):** {wins}\n**Date:** {current_date}\n\n**Highest wins so far:** {max_wins}")
     else:
         with open(WINS_CSV, "a", newline="") as f:
             writer = csv.writer(f)
             writer.writerow([current_date, wins])
-
         await ctx.send(f"**{win_string}**\n\n**Today's wins:** {wins}\n**Date:** {current_date}\n\n**Highest wins so far:** {max_wins}")
 
-
+# add wins to csv (not bothered to create a db)
 @bot.command(name="wins")
 async def wins(ctx):
     df = pd.read_csv(WINS_CSV)
@@ -66,21 +92,38 @@ async def wins(ctx):
     if df.empty:
         response = "No wins recorded yet."
     else:
-        table = tabulate(df, headers="keys", tablefmt="simple_grid", showindex=False)
-        response = f"**Wins History:**\n```{table}```"
+        response = f"**Wins History:**\n```{df.to_markdown(index=False)}```"
     await ctx.send(response)
-    
+
+# create a chart for wins
+@bot.command(name="chart")
+async def chart(ctx):
+    df = pd.read_csv(WINS_CSV)
+
+    if df.empty:
+        await ctx.send("No wins recorded yet.")
+        return
+
+    # Create the line chart and save in byte
+    fig = go.Figure(data=go.Scatter(x=df["date"], y=df["wins"], mode="lines"))
+    fig.update_layout(title="Wins Chart", xaxis_title="Date", yaxis_title="Wins")
+    chart_bytes = fig.to_image(format="png")
+
+    # Send the image to Discord
+    chart_file = discord.File(io.BytesIO(chart_bytes), filename="wins_chart.png")
+    await ctx.send(file=chart_file)
+
 
 @bot.event
 async def on_ready():
-    print(f"We have logged in as {bot.user}")
+    print(f"Logged in as {bot.user}")
     await schedule_mentions()
 
 
 async def schedule_mentions():
     while True:
         now = datetime.now()
-        target_time = now.replace(hour=21, minute=15, second=0, microsecond=0)
+        target_time = now.replace(hour=HOURS, minute=MINUTES, second=0, microsecond=0)
 
         if now > target_time:
             target_time += timedelta(days=1)
@@ -104,7 +147,8 @@ async def schedule_mentions():
             print(f"Role '{ROLE_NAME}' not found in any server.")
             return
 
-        # Mention the role
-        await channel.send(f"{role.mention} TIME FOR BEDWARS ⏰")
+        # CALL BED BUGS
+        await channel.send(f"{role.mention} {random.choice(BW_TIME_STRINGS)}")
+
 
 bot.run(TOKEN)

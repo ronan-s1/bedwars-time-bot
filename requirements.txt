@@ -1,0 +1,6 @@
+kaleido
+pandas
+plotly
+discord
+discord.py
+python-dotenv
