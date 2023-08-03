@@ -36,7 +36,7 @@ help_message = """
 - `$chart`: Show a chart of the wins history.
 - `$help`: Show this help message.
 
-souce: https://github.com/ronan-s1/bedwars-time-bot/tree/main
+souce: <https://github.com/ronan-s1/bedwars-time-bot/tree/main>
 """
 
 @bot.command(name="help")
