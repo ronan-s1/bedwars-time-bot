@@ -22,9 +22,28 @@ intents.messages = True
 bot = commands.Bot(command_prefix="$", intents=intents)
 
 @bot.command(name="add")
-async def add(ctx, wins: int):
-    if not isinstance(wins, int) or wins <= 0:
-        await ctx.send("wins must be a positive whole number.")
+async def add(ctx, wins):
+    win_string = ""
+    df = pd.read_csv(WINS_CSV)
+    max_wins = df["wins"].max()
+
+    try:
+        wins = int(wins)
+        if wins < 0:
+            raise ValueError
+        elif wins > max_wins:
+            win_string = "NEW RECORD BABY OHH YEAHHH"
+        elif wins >= 3:
+            win_string = "YOOOOOOOO"
+        elif wins > 1:
+            win_string = "sheesh"
+        elif wins > 0:
+            win_string = "mid"
+        elif wins == 0:
+            win_string = "bruh"
+        
+    except ValueError:
+        await ctx.send("must enter a positive whole number.")
         return
 
     current_date = datetime.now().strftime("%d %b %Y")
@@ -37,10 +56,7 @@ async def add(ctx, wins: int):
             writer = csv.writer(f)
             writer.writerow([current_date, wins])
 
-        df = pd.read_csv(WINS_CSV)
-        max_wins = df["wins"].max()
-
-        await ctx.send(f"**Today's wins:** {wins}\n**Date:** {current_date}\n\n**Highest wins so far:** {max_wins}")
+        await ctx.send(f"**{win_string}**\n\n**Today's wins:** {wins}\n**Date:** {current_date}\n\n**Highest wins so far:** {max_wins}")
 
 
 @bot.command(name="wins")
