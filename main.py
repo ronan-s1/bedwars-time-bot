@@ -31,12 +31,12 @@ bot.remove_command("help")
 
 
 help_message = """
-- `$add <wins>`: Record the number of bedwars wins for today.
-- `$wins`: Show the wins history.
-- `$chart`: Show a chart of the wins history.
+- `$add <wins>`: Record the number of wins for today.
+- `$wins`: Show wins history.
+- `$stats`: Show wins stats.
 - `$help`: Show this help message.
 
-souce: <https://github.com/ronan-s1/bedwars-time-bot>
+- `souce:` <https://github.com/ronan-s1/bedwars-time-bot>
 """
 
 @bot.command(name="help")
@@ -82,7 +82,7 @@ async def add(ctx, wins):
         with open(WINS_CSV, "a", newline="") as f:
             writer = csv.writer(f)
             writer.writerow([current_date, wins])
-        await ctx.send(f"**{win_string}**\n\n**Today's wins:** {wins}\n**Date:** {current_date}\n\n**Highest wins so far:** {max_wins}")
+        await ctx.send(f"**{win_string}**\n\n**Today's wins:** {wins}\n**Date:** {current_date}\n\n**Highscore:** {max_wins}")
 
 # add wins to csv (not bothered to create a db)
 @bot.command(name="wins")
@@ -96,22 +96,31 @@ async def wins(ctx):
     await ctx.send(response)
 
 # create a chart for wins
-@bot.command(name="chart")
+@bot.command(name="stats")
 async def chart(ctx):
+    loading_message = await ctx.send("Loading...")
+
     df = pd.read_csv(WINS_CSV)
 
     if df.empty:
         await ctx.send("No wins recorded yet.")
         return
 
+    average_wins = df["wins"].mean()
+    max_wins = df["wins"].max()
+
     # Create the line chart and save in byte
     fig = go.Figure(data=go.Scatter(x=df["date"], y=df["wins"], mode="lines"))
     fig.update_layout(title="Wins Chart", xaxis_title="Date", yaxis_title="Wins")
     chart_bytes = fig.to_image(format="png")
 
-    # Send the image to Discord
+    # Send the chart image and average wins to Discord
     chart_file = discord.File(io.BytesIO(chart_bytes), filename="wins_chart.png")
+
+    await loading_message.delete()
+    await ctx.send("**Wins Chart:**")
     await ctx.send(file=chart_file)
+    await ctx.send(f"**Average wins:** {average_wins:.2f}\n**Highscore:** {max_wins}")
 
 
 @bot.event
