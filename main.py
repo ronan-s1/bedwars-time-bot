@@ -16,11 +16,14 @@ TOKEN = str(os.getenv("TOKEN"))
 CHANNEL_ID = 829470513734484031
 ROLE_NAME = "Bed Bugs"
 
+
+# DING DING DING
+BEDWARS_TIME = "21:15"
+HOURS, MINUTES = map(int, BEDWARS_TIME.split(":"))
+
 # Other globals
 WINS_CSV = "wins.csv"
 BW_TIME_STRINGS = ["BEDS 🛏️ ROCKING 🪨 TIME ⏰", "GET ON BEDWARS NOW ❗", "BED 🛏️ BUGS 🐛 ASSEMBLE ❗", "TIME FOR BEDWARS ⏰"]
-BEDWARS_TIME = "21:15"
-HOURS, MINUTES = map(int, BEDWARS_TIME.split(":"))
 
 # intents to get messages
 intents = discord.Intents.all()
