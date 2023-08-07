@@ -16,7 +16,7 @@ HOURS, MINUTES = map(int, BEDWARS_TIME.split(":"))
 
 # Getting details for running bot
 load_dotenv(find_dotenv())
-TOKEN = str(os.getenv("TOKEN"))
+TOKEN = os.getenv("TOKEN")
 CHANNEL_ID = 829470513734484031
 ROLE_NAME = "Bed Bugs"
 
@@ -132,24 +132,24 @@ async def on_ready():
 
 
 async def schedule_mentions():
+    channel = bot.get_channel(CHANNEL_ID)
+    if not channel:
+        print(f"Channel with ID {CHANNEL_ID} not found.")
+        return
+
+    for guild in bot.guilds:
+        role = discord.utils.get(guild.roles, name=ROLE_NAME)
+        if role:
+            break
+
+    if not role:
+        print(f"Role '{ROLE_NAME}' not found in any server.")
+        return
+
+    if BEDWARS_TIME != "21:15":
+        await channel.send(f"{role.mention} **NOTICE:**\nBedwars will now commence at **{BEDWARS_TIME}**, apologies for any inconvenience.")
+
     while True:
-        channel = bot.get_channel(CHANNEL_ID)
-        if not channel:
-            print(f"Channel with ID {CHANNEL_ID} not found.")
-            return
-
-        for guild in bot.guilds:
-            role = discord.utils.get(guild.roles, name=ROLE_NAME)
-            if role:
-                break
-
-        if not role:
-            print(f"Role '{ROLE_NAME}' not found in any server.")
-            return
-
-        if BEDWARS_TIME != "21:15":
-            await channel.send(f"{role.mention} **NOTICE:**\nBedwars will now commence at **{BEDWARS_TIME}**, apologies for any inconvenience.")
-
         # setting time to @
         now = datetime.now()
         target_time = now.replace(hour=HOURS, minute=MINUTES, second=0, microsecond=0)
