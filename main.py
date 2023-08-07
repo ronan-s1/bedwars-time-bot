@@ -10,16 +10,15 @@ from discord.ext import commands
 from dotenv import find_dotenv, load_dotenv
 import plotly.graph_objects as go
 
+# DING DING DING
+BEDWARS_TIME = "22:00"
+HOURS, MINUTES = map(int, BEDWARS_TIME.split(":"))
+
 # Getting details for running bot
 load_dotenv(find_dotenv())
 TOKEN = str(os.getenv("TOKEN"))
 CHANNEL_ID = 829470513734484031
 ROLE_NAME = "Bed Bugs"
-
-
-# DING DING DING
-BEDWARS_TIME = "21:15"
-HOURS, MINUTES = map(int, BEDWARS_TIME.split(":"))
 
 # Other globals
 WINS_CSV = "wins.csv"
@@ -134,18 +133,7 @@ async def on_ready():
 
 async def schedule_mentions():
     while True:
-        now = datetime.now()
-        target_time = now.replace(hour=HOURS, minute=MINUTES, second=0, microsecond=0)
-
-        if now > target_time:
-            target_time += timedelta(days=1)
-
-        # Calculate the time until the target time
-        delta = target_time - now
-        await asyncio.sleep(delta.total_seconds())
-
         channel = bot.get_channel(CHANNEL_ID)
-
         if not channel:
             print(f"Channel with ID {CHANNEL_ID} not found.")
             return
@@ -158,6 +146,21 @@ async def schedule_mentions():
         if not role:
             print(f"Role '{ROLE_NAME}' not found in any server.")
             return
+
+        if BEDWARS_TIME != "21:15":
+            await channel.send(f"{role.mention} **NOTICE:**\nBedwars will now commence at **{BEDWARS_TIME}**, apologies for any inconvenience.")
+
+        # setting time to @
+        now = datetime.now()
+        target_time = now.replace(hour=HOURS, minute=MINUTES, second=0, microsecond=0)
+
+        # If time has passed, set for tomorrow
+        if now > target_time:
+            target_time += timedelta(days=1)
+
+        # Calculate the time until the target time
+        delta = target_time - now
+        await asyncio.sleep(delta.total_seconds())
 
         # CALL BED BUGS
         await channel.send(f"{role.mention} {random.choice(BW_TIME_STRINGS)}")
