@@ -11,14 +11,14 @@ from dotenv import find_dotenv, load_dotenv
 import plotly.graph_objects as go
 
 # DING DING DING
-BEDWARS_TIME = "22:00"
+BEDWARS_TIME = "21:15"
 HOURS, MINUTES = map(int, BEDWARS_TIME.split(":"))
 
 # Getting details for running bot
 load_dotenv(find_dotenv())
-TOKEN = os.getenv("TOKEN")
-CHANNEL_ID = 829470513734484031
-ROLE_NAME = "Bed Bugs"
+TOKEN = os.environ["TOKEN"]
+CHANNEL_ID = int(os.environ["CHANNEL_ID"])
+ROLE_NAME = os.environ["ROLE_NAME"]
 
 # Other globals
 WINS_CSV = "wins.csv"
