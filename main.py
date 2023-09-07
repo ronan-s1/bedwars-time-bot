@@ -11,7 +11,7 @@ from dotenv import find_dotenv, load_dotenv
 import plotly.graph_objects as go
 
 # DING DING DING
-BEDWARS_TIME = "21:40"
+BEDWARS_TIME = "21:30"
 HOURS, MINUTES = map(int, BEDWARS_TIME.split(":"))
 
 # Getting details for running bot
@@ -145,9 +145,6 @@ async def schedule_mentions():
     if not role:
         print(f"Role '{ROLE_NAME}' not found in any server.")
         return
-
-    if BEDWARS_TIME != "21:15":
-        await channel.send(f"{role.mention} **NOTICE:**\nBedwars will commence at **{BEDWARS_TIME}** instead of the usual 21:15, apologies for any inconvenience.")
 
     while True:
         # setting time to @
