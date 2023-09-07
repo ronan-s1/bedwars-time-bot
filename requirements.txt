@@ -1,4 +1,4 @@
-kaleido
+kaleido==0.1.0.post1
 pandas
 plotly
 discord
