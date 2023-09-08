@@ -1,14 +1,15 @@
 import asyncio
+import csv
 import io
 import os
-import discord
-import csv
-import random
-import pandas as pd
 from datetime import datetime, timedelta
-from discord.ext import commands
-from dotenv import find_dotenv, load_dotenv
+
+import discord
+import pandas as pd
 import plotly.graph_objects as go
+import random
+from dotenv import find_dotenv, load_dotenv
+from discord.ext import commands
 
 # DING DING DING
 BEDWARS_TIME = "21:30"
