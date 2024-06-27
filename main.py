@@ -12,7 +12,7 @@ from dotenv import find_dotenv, load_dotenv
 from discord.ext import commands
 
 # DING DING DING
-BEDWARS_TIME = "21:30"
+BEDWARS_TIME = "20:00"
 HOURS, MINUTES = map(int, BEDWARS_TIME.split(":"))
 
 # Getting details for running bot
